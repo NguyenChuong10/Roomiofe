@@ -3,7 +3,8 @@ import roomReducer from "@/features/room/store/roomSlice"
 
 export const store = configureStore({
     reducer : {
-        room: roomReducer;
+        room: roomReducer,
+
     }
 })
 

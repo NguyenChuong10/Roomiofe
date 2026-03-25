@@ -20,10 +20,10 @@ createRoot(document.getElementById('root')!).render(
                         duration:3000,
                         className:'font-sans text-sm rounded-lg shadow-card',
                         success:{
-                            className :'font-sans text-sm rouded-lg bg-green-50 text-green-500 border border-green-20'
+                            className :'font-sans text-sm rounded-lg bg-green-50 text-green-500 border border-green-200'
                         },
                         error : {
-                            className :'font-sans text-sm rouded-ls bg-red-50 text-red-500 border border-red-20'
+                            className :'font-sans text-sm rounded-lg bg-red-50 text-red-500 border border-red-200'
                         },
                     }}
                     >
