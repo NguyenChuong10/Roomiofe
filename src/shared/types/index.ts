@@ -117,7 +117,7 @@ export interface Payment {
 export type PaymentFormData = Pick<Payment,'roomId'| 'tenantId' | 'amount' | 'month' | 'year' | 'method' | 'note' >
 
 
-export interface DashboardStats {
+export interface DashboardStatus {
   totalHouses: number
   totalRooms: number
   availableRooms: number
