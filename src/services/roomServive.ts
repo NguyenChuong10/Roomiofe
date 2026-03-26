@@ -1,18 +1,9 @@
 
 import apiClient from "./apiClient";
-import type {
-    House,
-    Floor,
-    Room,
-    RoomFormData,
-    HouseFormData,
-    PaginatedResponse,
-    ApiResponse,
-    RoomFilter,
-} from '@/shared/types'
+import type {House,Floor,Room,RoomFormData,HouseFormData,PaginatedResponse,ApiResponse,RoomFilter,} from '@/shared/types'
 
 
-const HouseServices = {
+const HouseService = {
     getAll: async (page = 1 , limit = 10 ) : Promise<PaginatedResponse<House>> => {
         const response = await apiClient.get('/houses' , {
             params: {page , limit}
@@ -24,7 +15,7 @@ const HouseServices = {
         return response.data
     },
     create: async(data:HouseFormData): Promise<House> => {
-        const response = await apiClient.post(`/houses/` , data)
+        const response = await apiClient.post(`/houses` , data)
         return response.data 
     },
     update: async(id:string , data:HouseFormData): Promise<House> => {
@@ -37,7 +28,7 @@ const HouseServices = {
 
 }
 
-const FloorServices = {
+const FloorService = {
     getByHouse:async(housesId:string): Promise<Floor[]> => {
         const response = await apiClient.get(`/houses/${housesId}/floors`)
         return response.data
@@ -46,7 +37,7 @@ const FloorServices = {
         const response = await apiClient.get(`/floors/${id}`)
         return response.data
     },
-    creates : async(houseId: string , floorNo:number) : Promise<Floor> => {
+    create : async(houseId: string , floorNo:number) : Promise<Floor> => {
         const response = await apiClient.post(`/houses/${houseId}/floors` , {
             floorNo
         })
@@ -85,6 +76,6 @@ const RoomService = {
     },
 }
 
-export {HouseServices , FloorServices , RoomService}
+export {HouseService , FloorService , RoomService}
 
 export type {ApiResponse}
