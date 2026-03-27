@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit"
-import { houseService, floorService, RoomService } from "@/services/roomServive"
+import { houseService, floorService, roomService } from "@/services/roomServive"
 
 import type {
     House,
@@ -12,13 +12,13 @@ import type {
 } from '@/shared/types'
 
 interface RoomState {
-    house: House[]
+    houses: House[]
     selectedHouse: House | null
 
     floors: Floor[]
     selectedFloor: Floor | null
 
-    room: Room[]
+    rooms: Room[]
     selectedRoom: Room | null
 
     filter: RoomFilter
@@ -113,9 +113,9 @@ export const deleteHouse = createAsyncThunk('/room/deleteHouse', async (
 }
 )
 
-export const fetchFloorByHouse = createAsyncThunk(
+export const fetchFloorsByHouse = createAsyncThunk(
     'room/fetchFloorsByHouse',
-    async (houseId:string , {rejectWithValue} )=>{
+    async (houseId: string, { rejectWithValue }) => {
         try {
             return await floorService.getByHouse(houseId)
         } catch {
@@ -124,25 +124,290 @@ export const fetchFloorByHouse = createAsyncThunk(
     }
 )
 
-export const createFloor = createAsyncThunk('room/createFloor' , 
-    async({houseId , floorNo }:{houseId : string ; floorNo : number},{rejectWithValue} )=>{
+export const createFloor = createAsyncThunk('room/createFloor',
+    async ({ houseId, floorNo }: { houseId: string; floorNo: number }, { rejectWithValue }) => {
         try {
-            return await floorService.create(houseId , floorNo)
+            return await floorService.create(houseId, floorNo)
         } catch {
             return rejectWithValue('không thể thêm tầng')
         }
     }
 )
 
-export const deleteFloor = createAsyncThunk('room/deleteFloor', async(
-    id:string , {rejectWithValue}) => {
-        try{
-            await floorService.delete(id)
-            return id
-        }catch {
-            return rejectWithValue('Không thể xoá tầng')
+export const deleteFloor = createAsyncThunk('room/deleteFloor', async (
+    id: string, { rejectWithValue }) => {
+    try {
+        await floorService.delete(id)
+        return id
+    } catch {
+        return rejectWithValue('Không thể xoá tầng')
+    }
+}
+)
+
+export const fetchRooms = createAsyncThunk('room/fetchRooms',
+    async (
+        {
+            filter,
+            page,
+            limit,
+        }: { filter?: RoomFilter; page?: number; limit?: number } = {}, { rejectWithValue }
+    ) => {
+        try {
+            return await roomService.getAll(filter, page, limit)
+        } catch {
+            return rejectWithValue("không thể tải danh sách phòng")
         }
     }
 )
 
-export const fetchRooms = createAsyncThunk('room/fetchRooms')
+export const fetchRoomsByFloor = createAsyncThunk('room/fecthRoomByFloor',
+    async (floorId: string, { rejectWithValue }) => {
+        try {
+            return await roomService.getByFloor(floorId)
+        } catch {
+            return rejectWithValue("không thể tải danh sách phòng")
+        }
+    }
+)
+
+export const createRoom = createAsyncThunk('room/createRoom', async ({
+    floorId, data }: { floorId: string; data: RoomFormData }, { rejectWithValue }) => {
+    try {
+        return await roomService.create(floorId, data)
+    } catch {
+        return rejectWithValue("Không thể thêm phòng")
+    }
+}
+)
+
+export const updateRoom = createAsyncThunk('room/updateRoom', async (
+    { id, data }: { id: string; data: Partial<RoomFormData> }, { rejectWithValue }
+) => {
+    try {
+        return await roomService.update(id, data)
+    } catch {
+        return rejectWithValue("Không thể cập nhật phòng")
+    }
+}
+)
+
+export const deleteRoom = createAsyncThunk('room/deleteRoom', async (
+    id: string, { rejectWithValue }
+) => {
+    try {
+        await roomService.delete(id)
+        return id
+    } catch {
+        return rejectWithValue('Không thể xoá phòng')
+    }
+}
+)
+
+
+const roomSlice = createSlice({
+  name: 'room',
+  initialState,
+  reducers: {
+    // Chọn house để xem floors + rooms
+    setSelectedHouse: (state, action: PayloadAction<House | null>) => {
+      state.selectedHouse = action.payload
+      state.selectedFloor = null
+      state.rooms = []
+    },
+ 
+    // Chọn floor để xem rooms
+    setSelectedFloor: (state, action: PayloadAction<Floor | null>) => {
+      state.selectedFloor = action.payload
+    },
+ 
+    // Cập nhật filter
+    setFilter: (state, action: PayloadAction<RoomFilter>) => {
+      state.filter = action.payload
+      state.pagination.page = 1
+    },
+ 
+    // Cập nhật page
+    setPage: (state, action: PayloadAction<number>) => {
+      state.pagination.page = action.payload
+    },
+ 
+    // Mở modal thêm/sửa/xóa
+    openModal: (
+      state,
+      action: PayloadAction<{ mode: ModalState['mode']; selectedId?: string }>
+    ) => {
+      state.modal = { isOpen: true, ...action.payload }
+    },
+ 
+    // Đóng modal
+    closeModal: (state) => {
+      state.modal = { isOpen: false, mode: 'add', selectedId: undefined }
+      state.selectedRoom = null
+    },
+ 
+    // Xóa lỗi
+    clearError: (state) => {
+      state.error = null
+    },
+  },
+ 
+  extraReducers: (builder) => {
+    // ── fetchHouses ──
+    builder
+      .addCase(fetchHouses.pending, (state) => {
+        state.isLoadingHouses = true
+        state.error = null
+      })
+      .addCase(fetchHouses.fulfilled, (state, action) => {
+        state.isLoadingHouses = false
+        state.houses = action.payload.data
+        state.pagination = {
+          page: action.payload.meta.page,
+          limit: action.payload.meta.limit,
+          total: action.payload.meta.total,
+          totalPage: action.payload.meta.totalPages,
+        }
+      })
+      .addCase(fetchHouses.rejected, (state, action) => {
+        state.isLoadingHouses = false
+        state.error = action.payload as string
+      })
+ 
+    // ── createHouse ──
+    builder
+      .addCase(createHouse.pending, (state) => {
+        state.isSubmitting = true
+      })
+      .addCase(createHouse.fulfilled, (state, action) => {
+        state.isSubmitting = false
+        state.houses.unshift(action.payload)
+      })
+      .addCase(createHouse.rejected, (state, action) => {
+        state.isSubmitting = false
+        state.error = action.payload as string
+      })
+ 
+    // ── updateHouse ──
+    builder
+      .addCase(updateHouse.pending, (state) => {
+        state.isSubmitting = true
+      })
+      .addCase(updateHouse.fulfilled, (state, action) => {
+        state.isSubmitting = false
+        const idx = state.houses.findIndex((h) => h.id === action.payload.id)
+        if (idx !== -1) state.houses[idx] = action.payload
+      })
+      .addCase(updateHouse.rejected, (state, action) => {
+        state.isSubmitting = false
+        state.error = action.payload as string
+      })
+ 
+    // ── deleteHouse ──
+    builder
+      .addCase(deleteHouse.fulfilled, (state, action) => {
+        state.houses = state.houses.filter((h) => h.id !== action.payload)
+      })
+ 
+    // ── fetchFloorsByHouse ──
+    builder
+      .addCase(fetchFloorsByHouse.pending, (state) => {
+        state.isLoadingFloors = true
+      })
+      .addCase(fetchFloorsByHouse.fulfilled, (state, action) => {
+        state.isLoadingFloors = false
+        state.floors = action.payload
+      })
+      .addCase(fetchFloorsByHouse.rejected, (state, action) => {
+        state.isLoadingFloors = false
+        state.error = action.payload as string
+      })
+ 
+    // ── createFloor ──
+    builder
+      .addCase(createFloor.fulfilled, (state, action) => {
+        state.floors.push(action.payload)
+      })
+ 
+    // ── deleteFloor ──
+    builder
+      .addCase(deleteFloor.fulfilled, (state, action) => {
+        state.floors = state.floors.filter((f) => f.id !== action.payload)
+      })
+ 
+    // ── fetchRooms ──
+    builder
+      .addCase(fetchRooms.pending, (state) => {
+        state.isLoadingRooms = true
+        state.error = null
+      })
+      .addCase(fetchRooms.fulfilled, (state, action) => {
+        state.isLoadingRooms = false
+        state.rooms = action.payload.data
+        state.pagination = {
+          page: action.payload.meta.page,
+          limit: action.payload.meta.limit,
+          total: action.payload.meta.total,
+          totalPage: action.payload.meta.totalPages,
+        }
+      })
+      .addCase(fetchRooms.rejected, (state, action) => {
+        state.isLoadingRooms = false
+        state.error = action.payload as string
+      })
+ 
+    // ── fetchRoomsByFloor ──
+    builder
+      .addCase(fetchRoomsByFloor.fulfilled, (state, action) => {
+        state.rooms = action.payload
+      })
+ 
+    // ── createRoom ──
+    builder
+      .addCase(createRoom.pending, (state) => {
+        state.isSubmitting = true
+      })
+      .addCase(createRoom.fulfilled, (state, action) => {
+        state.isSubmitting = false
+        state.rooms.unshift(action.payload)
+      })
+      .addCase(createRoom.rejected, (state, action) => {
+        state.isSubmitting = false
+        state.error = action.payload as string
+      })
+ 
+    // ── updateRoom ──
+    builder
+      .addCase(updateRoom.pending, (state) => {
+        state.isSubmitting = true
+      })
+      .addCase(updateRoom.fulfilled, (state, action) => {
+        state.isSubmitting = false
+        const idx = state.rooms.findIndex((r) => r.id === action.payload.id)
+        if (idx !== -1) state.rooms[idx] = action.payload
+      })
+      .addCase(updateRoom.rejected, (state, action) => {
+        state.isSubmitting = false
+        state.error = action.payload as string
+      })
+ 
+    // ── deleteRoom ──
+    builder
+      .addCase(deleteRoom.fulfilled, (state, action) => {
+        state.rooms = state.rooms.filter((r) => r.id !== action.payload)
+      })
+  },
+})
+ 
+export const {
+  setSelectedHouse,
+  setSelectedFloor,
+  setFilter,
+  setPage,
+  openModal,
+  closeModal,
+  clearError,
+} = roomSlice.actions
+ 
+export default roomSlice.reducer
+

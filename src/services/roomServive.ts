@@ -3,7 +3,7 @@ import apiClient from "./apiClient";
 import type {House,Floor,Room,RoomFormData,HouseFormData,PaginatedResponse,ApiResponse,RoomFilter,} from '@/shared/types'
 
 
-const HouseService = {
+const houseService = {
     getAll: async (page = 1 , limit = 10 ) : Promise<PaginatedResponse<House>> => {
         const response = await apiClient.get('/houses' , {
             params: {page , limit}
@@ -28,7 +28,7 @@ const HouseService = {
 
 }
 
-const FloorService = {
+const floorService = {
     getByHouse:async(housesId:string): Promise<Floor[]> => {
         const response = await apiClient.get(`/houses/${housesId}/floors`)
         return response.data
@@ -48,7 +48,7 @@ const FloorService = {
     },
 }
 
-const RoomService = {
+const roomService = {
     getAll:async (
         filter?:RoomFilter,
         page =1,
@@ -76,6 +76,6 @@ const RoomService = {
     },
 }
 
-export {HouseService , FloorService , RoomService}
+export {houseService , floorService , roomService}
 
 export type {ApiResponse}
