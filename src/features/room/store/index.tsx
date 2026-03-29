@@ -27,7 +27,7 @@ interface RoomState {
         page: number
         limit: number
         total: number
-        totalPage: number
+        totalPages: number
     }
     modal: ModalState
 
@@ -40,18 +40,18 @@ interface RoomState {
 }
 
 const initialState: RoomState = {
-    house: [],
+    houses: [],
     selectedHouse: null,
     floors: [],
     selectedFloor: null,
-    room: [],
+    rooms: [],
     selectedRoom: null,
     filter: {},
     pagination: {
         page: 1,
         limit: 10,
         total: 0,
-        totalPage: 1,
+        totalPages: 1,
     },
     modal: {
         isOpen: false,
@@ -206,208 +206,154 @@ export const deleteRoom = createAsyncThunk('room/deleteRoom', async (
 
 
 const roomSlice = createSlice({
-  name: 'room',
-  initialState,
-  reducers: {
-    // Chọn house để xem floors + rooms
-    setSelectedHouse: (state, action: PayloadAction<House | null>) => {
-      state.selectedHouse = action.payload
-      state.selectedFloor = null
-      state.rooms = []
+    name: 'room',
+    initialState,
+    reducers: {
+        setSelectedHouse: (state, action: PayloadAction<House | null>) => {
+            state.selectedHouse = action.payload
+            state.selectedFloor = null
+            state.rooms = []
+        },
+        setSelectedFloor: (state, action: PayloadAction<Floor | null>) => {
+            state.selectedFloor = action.payload
+        },
+        setFilter: (state, action: PayloadAction<RoomFilter>) => {
+            state.filter = action.payload
+            state.pagination.page = 1
+        },
+        setPage: (state, action: PayloadAction<number>) => {
+            state.pagination.page = action.payload
+        },
+        openModal: (
+            state,
+            action: PayloadAction<{ mode: ModalState['mode'], selectedId?: string }>) => {
+            state.modal.isOpen = true
+            state.modal.mode = action.payload.mode
+            state.modal.selectedId = action.payload.selectedId
+        },
+        closeModal: (state) => {
+            state.modal = { isOpen: false, mode: 'add', selectedId: undefined }
+            state.selectedRoom = null
+        },
+        clearError: (state) => {
+            state.error = null
+        },
     },
- 
-    // Chọn floor để xem rooms
-    setSelectedFloor: (state, action: PayloadAction<Floor | null>) => {
-      state.selectedFloor = action.payload
-    },
- 
-    // Cập nhật filter
-    setFilter: (state, action: PayloadAction<RoomFilter>) => {
-      state.filter = action.payload
-      state.pagination.page = 1
-    },
- 
-    // Cập nhật page
-    setPage: (state, action: PayloadAction<number>) => {
-      state.pagination.page = action.payload
-    },
- 
-    // Mở modal thêm/sửa/xóa
-    openModal: (
-      state,
-      action: PayloadAction<{ mode: ModalState['mode']; selectedId?: string }>
-    ) => {
-      state.modal = { isOpen: true, ...action.payload }
-    },
- 
-    // Đóng modal
-    closeModal: (state) => {
-      state.modal = { isOpen: false, mode: 'add', selectedId: undefined }
-      state.selectedRoom = null
-    },
- 
-    // Xóa lỗi
-    clearError: (state) => {
-      state.error = null
-    },
-  },
- 
-  extraReducers: (builder) => {
-    // ── fetchHouses ──
-    builder
-      .addCase(fetchHouses.pending, (state) => {
-        state.isLoadingHouses = true
-        state.error = null
-      })
-      .addCase(fetchHouses.fulfilled, (state, action) => {
-        state.isLoadingHouses = false
-        state.houses = action.payload.data
-        state.pagination = {
-          page: action.payload.meta.page,
-          limit: action.payload.meta.limit,
-          total: action.payload.meta.total,
-          totalPage: action.payload.meta.totalPages,
-        }
-      })
-      .addCase(fetchHouses.rejected, (state, action) => {
-        state.isLoadingHouses = false
-        state.error = action.payload as string
-      })
- 
-    // ── createHouse ──
-    builder
-      .addCase(createHouse.pending, (state) => {
-        state.isSubmitting = true
-      })
-      .addCase(createHouse.fulfilled, (state, action) => {
-        state.isSubmitting = false
-        state.houses.unshift(action.payload)
-      })
-      .addCase(createHouse.rejected, (state, action) => {
-        state.isSubmitting = false
-        state.error = action.payload as string
-      })
- 
-    // ── updateHouse ──
-    builder
-      .addCase(updateHouse.pending, (state) => {
-        state.isSubmitting = true
-      })
-      .addCase(updateHouse.fulfilled, (state, action) => {
-        state.isSubmitting = false
-        const idx = state.houses.findIndex((h) => h.id === action.payload.id)
-        if (idx !== -1) state.houses[idx] = action.payload
-      })
-      .addCase(updateHouse.rejected, (state, action) => {
-        state.isSubmitting = false
-        state.error = action.payload as string
-      })
- 
-    // ── deleteHouse ──
-    builder
-      .addCase(deleteHouse.fulfilled, (state, action) => {
-        state.houses = state.houses.filter((h) => h.id !== action.payload)
-      })
- 
-    // ── fetchFloorsByHouse ──
-    builder
-      .addCase(fetchFloorsByHouse.pending, (state) => {
-        state.isLoadingFloors = true
-      })
-      .addCase(fetchFloorsByHouse.fulfilled, (state, action) => {
-        state.isLoadingFloors = false
-        state.floors = action.payload
-      })
-      .addCase(fetchFloorsByHouse.rejected, (state, action) => {
-        state.isLoadingFloors = false
-        state.error = action.payload as string
-      })
- 
-    // ── createFloor ──
-    builder
-      .addCase(createFloor.fulfilled, (state, action) => {
-        state.floors.push(action.payload)
-      })
- 
-    // ── deleteFloor ──
-    builder
-      .addCase(deleteFloor.fulfilled, (state, action) => {
-        state.floors = state.floors.filter((f) => f.id !== action.payload)
-      })
- 
-    // ── fetchRooms ──
-    builder
-      .addCase(fetchRooms.pending, (state) => {
-        state.isLoadingRooms = true
-        state.error = null
-      })
-      .addCase(fetchRooms.fulfilled, (state, action) => {
-        state.isLoadingRooms = false
-        state.rooms = action.payload.data
-        state.pagination = {
-          page: action.payload.meta.page,
-          limit: action.payload.meta.limit,
-          total: action.payload.meta.total,
-          totalPage: action.payload.meta.totalPages,
-        }
-      })
-      .addCase(fetchRooms.rejected, (state, action) => {
-        state.isLoadingRooms = false
-        state.error = action.payload as string
-      })
- 
-    // ── fetchRoomsByFloor ──
-    builder
-      .addCase(fetchRoomsByFloor.fulfilled, (state, action) => {
-        state.rooms = action.payload
-      })
- 
-    // ── createRoom ──
-    builder
-      .addCase(createRoom.pending, (state) => {
-        state.isSubmitting = true
-      })
-      .addCase(createRoom.fulfilled, (state, action) => {
-        state.isSubmitting = false
-        state.rooms.unshift(action.payload)
-      })
-      .addCase(createRoom.rejected, (state, action) => {
-        state.isSubmitting = false
-        state.error = action.payload as string
-      })
- 
-    // ── updateRoom ──
-    builder
-      .addCase(updateRoom.pending, (state) => {
-        state.isSubmitting = true
-      })
-      .addCase(updateRoom.fulfilled, (state, action) => {
-        state.isSubmitting = false
-        const idx = state.rooms.findIndex((r) => r.id === action.payload.id)
-        if (idx !== -1) state.rooms[idx] = action.payload
-      })
-      .addCase(updateRoom.rejected, (state, action) => {
-        state.isSubmitting = false
-        state.error = action.payload as string
-      })
- 
-    // ── deleteRoom ──
-    builder
-      .addCase(deleteRoom.fulfilled, (state, action) => {
-        state.rooms = state.rooms.filter((r) => r.id !== action.payload)
-      })
-  },
+    extraReducers: (builder) => {
+        builder
+            .addCase(fetchHouses.pending, (state) => {
+                state.isLoadingHouses = true
+                state.error = null
+            })
+            .addCase(fetchHouses.fulfilled,(state , action)=>{
+                state.isLoadingHouses = false
+                state.houses = action.payload.data
+                state.pagination = action.payload.meta
+            })
+            .addCase(fetchHouses.rejected,(state , action)=> {
+                state.isLoadingHouses = false
+                state.error = action.payload as string
+            })
+        builder
+            .addCase(createHouse.pending,(state)=> {
+                state.isSubmitting = true
+            })
+            .addCase(createHouse.fulfilled,(state ,action) => {
+                state.isSubmitting = false
+                state.houses.unshift(action.payload)
+            })
+            .addCase(createHouse.rejected,(state ,action) => {
+                state.isSubmitting = false
+                state.error = action.payload as string
+            })
+        builder
+            .addCase(updateHouse.pending , (state) => {
+                state.isSubmitting = true
+            })
+            .addCase(updateHouse.fulfilled,(state , action) => {
+                state.isSubmitting = false
+                const idx = state.houses.findIndex((h) => h.id === action.payload.id)
+                if( idx !== -1 ) state.houses[idx] = action.payload
+            })
+            .addCase(updateHouse.rejected, (state , action) => {
+                state.isSubmitting = false
+                state.error = action.payload as string
+            })
+        builder
+            .addCase(fetchFloorsByHouse.pending, (state) => {
+                state.isLoadingFloors = true
+            })
+            .addCase(fetchFloorsByHouse.fulfilled,(state, action) => {
+                state.isLoadingFloors = false
+                state.floors = action.payload
+            })
+            .addCase(fetchFloorsByHouse.rejected,(state , action) => {
+                state.isLoadingFloors = false
+                state.error = action.payload as string
+            })
+        builder
+            .addCase(createFloor.fulfilled , (state , action) => {
+                state.floors.push(action.payload)
+            })
+        builder
+            .addCase(deleteFloor.fulfilled ,(state ,action) => {
+                state.floors = state.floors.filter((f) => f.id !== action.payload)
+            })
+        builder
+            .addCase(fetchRooms.pending , (state) => {
+                state.isLoadingRooms = true
+                state.error = null
+            })
+            .addCase(fetchRooms.fulfilled , (state ,action) => {
+                state.isLoadingRooms = false
+                state.rooms = action.payload.data
+                state.pagination = action.payload.meta
+            })
+            .addCase(fetchRooms.rejected,(state , action)=>{
+                state.isLoadingRooms = false
+                state.error = action.payload as string
+            })
+        builder
+            .addCase(createRoom.pending,(state)=> {
+                state.isSubmitting = true
+            })
+            .addCase(createRoom.fulfilled ,(state,action)=> {
+                state.isSubmitting =false
+                state.rooms.unshift(action.payload)
+            })
+            .addCase(createRoom.rejected,(state,action) => {
+                state.isSubmitting = false
+                state.error = action.payload as string
+            })
+        builder
+            .addCase(updateRoom.pending ,(state) => {
+                state.isSubmitting = true
+            })
+            .addCase(updateRoom.fulfilled , (state ,action) => {
+                state.isSubmitting = false
+                const idx = state.rooms.findIndex((r) => r.id === action.payload.id)
+                if( idx!== -1) state.rooms[idx] = action.payload
+            })
+            .addCase(updateRoom.rejected , (state , action) => {
+                state.isSubmitting = false
+                state.error = action.payload as string
+            })
+        builder
+            .addCase(deleteRoom.fulfilled,(state , action) => {
+                state.rooms = state.rooms.filter((r) => r.id !== action.payload)
+            })
+    }
+        
 })
- 
+
 export const {
-  setSelectedHouse,
-  setSelectedFloor,
-  setFilter,
-  setPage,
-  openModal,
-  closeModal,
-  clearError,
+    setSelectedHouse,
+    setSelectedFloor,
+    setFilter,
+    setPage,
+    openModal,
+    clearError,
 } = roomSlice.actions
- 
+
 export default roomSlice.reducer
 
