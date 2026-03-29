@@ -3,9 +3,9 @@ import {StrictMode} from "react";
 import {createRoot} from "react-dom/client";
 import {Provider} from "react-redux";
 import {BrowserRouter} from "react-router-dom";
-import {Toaster} from "react-hot-toast";
-
 import {store} from "@/app/store";
+
+import { AppToaster } from "./shared/components/AppToaster";
 import AppRoutes from "@/routes";
 import "@/styles/global.css";
 
@@ -14,20 +14,7 @@ createRoot(document.getElementById('root')!).render(
         <Provider store={store}>
             <BrowserRouter>
                 <AppRoutes/>
-                <Toaster 
-                    position="top-right"
-                    toastOptions={{
-                        duration:3000,
-                        className:'font-sans text-sm rounded-lg shadow-card',
-                        success:{
-                            className :'font-sans text-sm rounded-lg bg-green-50 text-green-500 border border-green-200'
-                        },
-                        error : {
-                            className :'font-sans text-sm rounded-lg bg-red-50 text-red-500 border border-red-200'
-                        },
-                    }}
-                    >
-                </Toaster>
+                <AppToaster/>
             </BrowserRouter>
         </Provider>
     </StrictMode>

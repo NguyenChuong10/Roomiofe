@@ -35,9 +35,9 @@ apiClient.interceptors.response.use(
         }
         return response
     },
-    (error: AxiosError<{ messase?: string }>) => {
+    (error: AxiosError<{ message?: string }>) => {
         const status = error.response?.status
-        const message = error.response?.data?.messase
+        const message = error.response?.data?.message
 
         switch (status) {
             case 400:
