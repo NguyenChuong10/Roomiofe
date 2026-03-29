@@ -1,10 +1,10 @@
 import axios, { AxiosError, type AxiosResponse } from 'axios'
 import camelcaseKeys from 'camelcase-keys'
-import snackcaseKeys from 'snakecase-keys'
+import snakecaseKeys from 'snakecase-keys'
 import toast from 'react-hot-toast'
 
 export const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api',
+    baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api/v1',
     timeout: 10000,
     headers: {
         'Content-Type': 'application/json'
@@ -18,10 +18,10 @@ apiClient.interceptors.request.use(
             config.headers.Authorization = `Bearer ${token}`
         }
         if (config.data) {
-            config.data = snackcaseKeys(config.data, { deep: true })
+            config.data = snakecaseKeys(config.data, { deep: true })
         }
         if (config.params) {
-            config.params = snackcaseKeys(config.params, { deep: true })
+            config.params = snakecaseKeys(config.params, { deep: true })
         }
         return config
     },

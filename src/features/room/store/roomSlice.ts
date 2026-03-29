@@ -107,9 +107,20 @@ const roomSlice = createSlice({
                 state.isLoading = false
                 state.error = action.payload as string
             })
+
+            .addCase(fetchRoomsByFloor.pending, (state) => {
+                state.isLoading = true
+                state.error = null
+            })
             .addCase(fetchRoomsByFloor.fulfilled, (state, action) => {
+                state.isLoading = false
                 state.items = action.payload
             })
+            .addCase(fetchRoomsByFloor.rejected, (state, action) => {
+                state.isLoading = false
+                state.error = action.payload as string
+            })
+
             .addCase(createRoom.pending, (state) => {
                 state.isSubmitting = true
             })
@@ -121,6 +132,7 @@ const roomSlice = createSlice({
                 state.isSubmitting = false
                 state.error = action.payload as string
             })
+            
             .addCase(updateRoom.pending, (state) => {
                 state.isSubmitting = true
             })

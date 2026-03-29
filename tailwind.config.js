@@ -1,4 +1,4 @@
-import { Sidebar } from "lucide-react";
+
 
 /** @type {import("tailwindcss").Config} */
 export default {
