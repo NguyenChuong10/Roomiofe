@@ -67,6 +67,12 @@ const floorSlice = createSlice({
             .addCase(createFloor.fulfilled, (state, action) => {
                 state.items.push(action.payload)
             })
+            .addCase(createFloor.pending, (state) => { state.isLoading = true })
+            
+            .addCase(createFloor.rejected, (state, action) => {
+                state.isLoading = false
+                state.error = action.payload as string
+            })
             .addCase(deleteFloor.fulfilled, (state, action) => {
                 state.items = state.items.filter(f => f.id !== action.payload)
             })
