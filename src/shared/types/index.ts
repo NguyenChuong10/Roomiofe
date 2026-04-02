@@ -22,26 +22,14 @@ export enum PaymentMethod {
 }
 
 export interface User {
-  id: string,
-  name: string,
-  phone: string,
-  email: string,
-  role: UserRole,
-  createdAt: string,
+  id: string
+  name: string
+  phone: string
+  email: string
+  role: UserRole
+  createdAt: string
 }
 
-export interface LoginCredentials {
-  email: string,
-  password: string,
-}
-
-export interface AuthState {
-  user: User | null,
-  token: string | null,
-  isAuthenticated: boolean,
-  isLoading: boolean,
-  error: string | null
-}
 
 export interface House {
   id: string,
