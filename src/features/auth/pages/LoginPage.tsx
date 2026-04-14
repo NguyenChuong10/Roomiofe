@@ -42,7 +42,7 @@ export default function LoginPage() {
 
                 {/* ══════════════ PANEL TRÁI — dark navy ══════════════ */}
                 <div
-                    className="hidden md:flex flex-col justify-between w-[42%] shrink-0 p-10"
+                    className="hidden md:flex flex-col justify-center gap-20 w-[42%] shrink-0 p-10"
                     style={{ background: '#111c2d' }}
                 >
                     {/* Logo */}
@@ -55,7 +55,7 @@ export default function LoginPage() {
                         </div>
                         <div>
                             <p className="text-white font-medium text-[15px] leading-none">Roomio</p>
-                            <p className="text-[11px] mt-0.5" style={{ color: '#6a8fa8' }}>Quản lý phòng trọ</p>
+                            <p className="text-[11px] mt-0.5" style={{ color: '#6a8fa8' }}>Quản lý phòng</p>
                         </div>
                     </div>
 
@@ -65,30 +65,15 @@ export default function LoginPage() {
                             Chào mừng trở lại,<br />Admin Dashboard
                         </h2>
                         <p className="text-[13px] leading-relaxed" style={{ color: '#6a8fa8' }}>
-                            Quản lý toàn bộ hệ thống nhà trọ — phòng, người thuê và thanh toán tập trung tại một nơi.
+                            Quản lý toàn bộ hệ thống nhà — phòng, người thuê và thanh toán tập trung tại một nơi.
                         </p>
                     </div>
 
                     {/* Stats */}
-                    <div className="grid grid-cols-3 gap-3">
-                        {[
-                            { num: '48', lbl: 'Tổng phòng' },
-                            { num: '36', lbl: 'Đã cho thuê' },
-                            { num: '12', lbl: 'Còn trống' },
-                        ].map(({ num, lbl }) => (
-                            <div
-                                key={lbl}
-                                className="rounded-xl px-3 py-3"
-                                style={{ background: '#172438', border: '0.5px solid #1a2d42' }}
-                            >
-                                <p className="text-white font-medium text-[20px] leading-none">{num}</p>
-                                <p className="text-[11px] mt-1" style={{ color: '#6a8fa8' }}>{lbl}</p>
-                            </div>
-                        ))}
-                    </div>
+                    
                 </div>
 
-                {/* ══════════════ PANEL PHẢI — form ══════════════ */}
+                
                 <div className="flex-1 bg-white flex flex-col justify-center px-8 md:px-10 py-10">
 
                     {/* Tiêu đề */}
