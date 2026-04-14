@@ -6,6 +6,11 @@ import path from "path"
 import { fileURLToPath } from 'url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+const PORT = parseInt(process.env.PORT || '3000')
+const allowedHosts = process.env.ALLOWED_HOSTS
+  ? process.env.ALLOWED_HOSTS.split(',').map(h => h.trim())
+  : ['localhost']
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -19,7 +24,8 @@ export default defineConfig({
     },
   },
   server: {
-    port :3000,
-    
+    allowedHosts,
+    port :PORT,
+    host : true,
   },
 })

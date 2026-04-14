@@ -6,7 +6,8 @@ import { Eye, EyeOff, Mail, Lock, Loader2, LogIn, LayoutDashboard } from 'lucide
 import { loginSchema, type LoginFormValues } from '@/features/auth/schemas/loginSchemas'
 import { loginThunk, clearAuthError } from '../store/authSlice'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import { cn } from '@/shared/utils'
+import { UserRole } from '@/shared/types'
+import { cn } from '@/shared/utils/index'
 
 export default function LoginPage() {
     const navigate = useNavigate()
@@ -32,7 +33,7 @@ export default function LoginPage() {
     useEffect(() => () => { dispatch(clearAuthError()) }, [dispatch])
 
     const onSubmit = (values: LoginFormValues) => {
-        dispatch(loginThunk(values))
+        dispatch(loginThunk({ ...values, rule: UserRole.ADMIN }))
     }
 
     return (
@@ -227,4 +228,4 @@ export default function LoginPage() {
             </div>
         </div>
     )
-}
+} 
