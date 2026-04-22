@@ -1,216 +1,136 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Eye, EyeOff, Mail, Lock, Loader2, LogIn, LayoutDashboard } from 'lucide-react'
-import { loginSchema, type LoginFormValues } from '@/features/auth/schemas/loginSchemas'
-import { loginThunk, clearAuthError } from '../store/authSlice'
-import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import { UserRole } from '@/shared/types'
-import { cn } from '@/shared/utils/index'
+import logo from "@/assets/RoomioLogo.png"
+import { Star, Home, Eye, EyeOff, Mail, Lock, LogIn } from "lucide-react"
+import { useState } from "react"
+import { Link } from "react-router-dom"
+import { Checkbox } from "@/shared/components/ui/checkbox"
+
 
 export default function LoginPage() {
-    const navigate = useNavigate()
-    const dispatch = useAppDispatch()
-    const { isLoading, error, isAuthenticated } = useAppSelector((s) => s.auth)
-    const [showPass, setShowPass] = useState(false)
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<LoginFormValues>({
-        resolver: zodResolver(loginSchema),
-        defaultValues: { email: '', password: '' },
-    })
-
-    // Đã auth → vào dashboard
-    useEffect(() => {
-        if (isAuthenticated) navigate('/admin/dashboard', { replace: true })
-    }, [isAuthenticated, navigate])
-
-    // Clear error khi unmount
-    useEffect(() => () => { dispatch(clearAuthError()) }, [dispatch])
-
-    const onSubmit = (values: LoginFormValues) => {
-        dispatch(loginThunk({ ...values, rule: UserRole.ADMIN }))
-    }
-
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
-            <div className="w-full max-w-[860px] flex rounded-2xl overflow-hidden border border-white/10 shadow-card">
-
-                {/* ══════════════ PANEL TRÁI — dark navy ══════════════ */}
-                <div
-                    className="hidden md:flex flex-col justify-center gap-20 w-[42%] shrink-0 p-10"
-                    style={{ background: '#111c2d' }}
-                >
-                    {/* Logo */}
-                    <div className="flex items-center gap-3">
-                        <div
-                            className="flex items-center justify-center w-9 h-9 rounded-lg"
-                            style={{ background: '#1e6abf' }}
-                        >
-                            <LayoutDashboard className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                            <p className="text-white font-medium text-[15px] leading-none">Roomio</p>
-                            <p className="text-[11px] mt-0.5" style={{ color: '#6a8fa8' }}>Quản lý phòng</p>
-                        </div>
-                    </div>
-
-                    {/* Mid text */}
-                    <div>
-                        <h2 className="text-white text-[22px] font-medium leading-snug mb-3">
-                            Chào mừng trở lại,<br />Admin Dashboard
-                        </h2>
-                        <p className="text-[13px] leading-relaxed" style={{ color: '#6a8fa8' }}>
-                            Quản lý toàn bộ hệ thống nhà — phòng, người thuê và thanh toán tập trung tại một nơi.
-                        </p>
-                    </div>
-
-                    {/* Stats */}
-                    
-                </div>
-
-                
-                <div className="flex-1 bg-white flex flex-col justify-center px-8 md:px-10 py-10">
-
-                    {/* Tiêu đề */}
-                    <h1 className="text-[20px] font-medium text-gray-900 mb-1">Đăng nhập</h1>
-                    <p className="text-[13px] text-gray-500 mb-7">Nhập thông tin tài khoản để tiếp tục</p>
-
-                    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-
-                        {/* ── Email ── */}
-                        <div className="space-y-1.5">
-                            <label className="block text-[13px] font-medium text-gray-600">
-                                Email
-                            </label>
-                            <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                                <input
-                                    type="email"
-                                    autoComplete="email"
-                                    placeholder="admin@roomio.dev"
-                                    {...register('email')}
-                                    className={cn(
-                                        'w-full h-10 pl-9 pr-4 rounded-lg text-[13px] text-gray-900',
-                                        'bg-gray-50 border outline-none transition-all',
-                                        'placeholder:text-gray-300',
-                                        'focus:ring-2 focus:ring-brand/20 focus:border-brand focus:bg-white',
-                                        errors.email
-                                            ? 'border-red-400 bg-red-50'
-                                            : 'border-gray-200 hover:border-gray-300'
-                                    )}
-                                />
-                            </div>
-                            {errors.email && (
-                                <p className="text-[12px] text-red-500 flex items-center gap-1.5">
-                                    <span className="w-1 h-1 rounded-full bg-red-400 inline-block shrink-0" />
-                                    {errors.email.message}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* ── Password ── */}
-                        <div className="space-y-1.5">
-                            <label className="block text-[13px] font-medium text-gray-600">
-                                Mật khẩu
-                            </label>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                                <input
-                                    type={showPass ? 'text' : 'password'}
-                                    autoComplete="current-password"
-                                    placeholder="••••••••"
-                                    {...register('password')}
-                                    className={cn(
-                                        'w-full h-10 pl-9 pr-10 rounded-lg text-[13px] text-gray-900',
-                                        'bg-gray-50 border outline-none transition-all',
-                                        'placeholder:text-gray-300',
-                                        'focus:ring-2 focus:ring-brand/20 focus:border-brand focus:bg-white',
-                                        errors.password
-                                            ? 'border-red-400 bg-red-50'
-                                            : 'border-gray-200 hover:border-gray-300'
-                                    )}
-                                />
-                                <button
-                                    type="button"
-                                    tabIndex={-1}
-                                    onClick={() => setShowPass(v => !v)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                                >
-                                    {showPass
-                                        ? <EyeOff className="w-4 h-4" />
-                                        : <Eye className="w-4 h-4" />
-                                    }
-                                </button>
-                            </div>
-                            {errors.password && (
-                                <p className="text-[12px] text-red-500 flex items-center gap-1.5">
-                                    <span className="w-1 h-1 rounded-full bg-red-400 inline-block shrink-0" />
-                                    {errors.password.message}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* ── Ghi nhớ + Quên mật khẩu ── */}
-                        <div className="flex items-center justify-between pt-0.5">
-                            <label className="flex items-center gap-2 text-[13px] text-gray-500 cursor-pointer select-none">
-                                <input
-                                    type="checkbox"
-                                    className="w-3.5 h-3.5 accent-brand rounded"
-                                />
-                                Ghi nhớ đăng nhập
-                            </label>
-                            <button
-                                type="button"
-                                className="text-[13px] text-brand hover:underline"
-                            >
-                                Quên mật khẩu?
-                            </button>
-                        </div>
-
-                        {/* ── API error ── */}
-                        {error && (
-                            <div className="flex items-center gap-2.5 px-3.5 py-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-[13px]">
-                                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <circle cx="12" cy="12" r="10" />
-                                    <line x1="12" y1="8" x2="12" y2="12" />
-                                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                                </svg>
-                                {error}
-                            </div>
-                        )}
-
-                        {/* ── Submit ── */}
-                        <button
-                            type="submit"
-                            disabled={isLoading}
-                            className={cn(
-                                'w-full h-10 mt-1 rounded-lg text-[14px] font-medium text-white',
-                                'flex items-center justify-center gap-2',
-                                'transition-all duration-150',
-                                'disabled:opacity-60 disabled:cursor-not-allowed',
-                                'hover:brightness-110 active:scale-[0.98]'
-                            )}
-                            style={{ background: '#1e6abf' }}
-                        >
-                            {isLoading
-                                ? <><Loader2 className="w-4 h-4 animate-spin" /> Đang đăng nhập...</>
-                                : <><LogIn className="w-4 h-4" /> Đăng nhập</>
-                            }
-                        </button>
-                    </form>
-
-                    {/* Footer */}
-                    <p className="mt-8 text-center text-[12px] text-gray-300">
-                        © {new Date().getFullYear()} Roomio · Hệ thống quản lý phòng trọ
-                    </p>
-                </div>
-
+  const [showPassword, setShowPassword] = useState(false)
+  return (
+    <main className="h-screen flex items-center justify-center bg-red-50">
+      <div className="w-2/3 h-4/5 flex bg-amber-50 rounded-2xl overflow-hidden border border-solid border-gray-100 shadow-md">
+        <div className="w-5/12 h-full flex items-center justify-center bg-[#111C2D]">
+          <div className=" w-4/5 h-5/6 bg-[#111C2D] flex flex-col gap-15 ">
+            <div className="flex items-center gap-0 ">
+              <img src={logo} alt="logo" className="w-18 h-18 rounded-2xl shadow-lg shrink-0" />
+              <div className="flex flex-col">
+                <h2 className=" -mt-2 text-white font-sans text-lg font-bold tracking-wide">
+                  Roomio
+                </h2>
+                <p className=" text-[#6A8FA8] font-sans text-xs font-bold tracking-wide">
+                  Quản lý không gian
+                </p>
+              </div>
             </div>
+            <div className="flex flex-col gap-2">
+              <h1 className="ml-4 text-[#FFFFFF] font-sans text-xl">Chào mừng trở lại, <br /> Admin DashBoard </h1>
+              <p className="text-[#6A8FA8] text-sm ml-4 "> Quản lý toàn bộ hệ thống - phòng, người thuê <br />Và thanh toán tập trung tại một nơi </p>
+            </div>
+          </div>
         </div>
-    )
-} 
+        <div className="w-7/12 h-full bg-[#FFFFFF] flex items-center justify-center">
+          <div className="w-5/6 h-5/6  flex flex-col gap-5 ">
+            <div className="flex flex-col gap-2">
+              <h3 className="text-[#000000] text-2xl font-sans">Đăng nhập</h3>
+              <p className="text-[#000000] text-sm font-sans">Chưa có tài khoản ? <Link className="text-blue-300 hover:text-blue-800 cursor-pointer" to="/register">Đăng ký miễn phí</Link></p>
+            </div>
+            <div className="w-full h-18 flex gap-3">
+              <button className="
+                                w-1/2 h-1/2 bg-white font-sans
+                                flex gap-1 items-center justify-center
+                                hover:border border-gray-300 rounded-lg
+                              text-gray-600
+                              hover:border-blue-50 hover:text-blue-400 hover:bg-blue-50
+                                cursor-pointer transition-colors duration-200">
+                <Star size={16} />
+                <p>Admin</p>
+              </button>
+
+              <button className="
+                                  w-1/2 h-1/2 bg-white font-sans
+                                  flex gap-1 items-center justify-center
+                                  hover:border border-gray-300 rounded-lg
+                                text-gray-600
+                                hover:border-blue-50 hover:text-blue-400 hover:bg-blue-50
+                                  cursor-pointer transition-colors duration-200">
+                <Home size={16} />
+                <p>Chủ nhà</p>
+              </button>
+            </div>
+            <div className="w-full h-1/2 ">
+              <div className=" relative flex flex-col gap-5 ">
+                <div className="relative">
+                  <label htmlFor="email" className="block text-sm font-sans text-[#000000]">
+                    Email
+                  </label>
+                  <Mail size={16} className="absolute left-3 text-gray-500 top-9" />
+                  <input type="email"
+                    id="email"
+                    name="email"
+                    autoComplete="email"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200
+                    focus:outline-none focus:ring-1 focus:ring-blue-200
+                    text-sm md:text-base placeholder:text-gray-400"
+                    placeholder="admin@roomio.com"
+                  />
+                </div>
+                <div className="relative">
+                  <Lock size={16} className="absolute left-3 text-gray-500 top-9" />
+                  <label htmlFor="email" className="block text-sm font-sans text-[#000000]">
+                    Mật khẩu
+                  </label>
+                  <input type={showPassword ? "text" : "password"} id="email" name="email" autoComplete="email" className="w-full px-4 pl-10 py-2.5 pr-10 rounded-lg border border-gray-200 
+                       focus:outline-none focus:ring-1 focus:ring-blue-200
+                       text-sm md:text-base  " />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top- -translate-y-1/2 flex items-center px-3 text-gray-400 hover:text-gray-600" >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                <div className="w-full h-1/2 flex justify-between items-center">
+                  <div className="flex items-center gap-1">
+                    <Checkbox id="terms-checkbox" name="terms-checkbox" />
+                    <label className="font-sans text-sm" htmlFor="terms-checkbox">ghi nhớ đăng nhập</label>
+                  </div>
+                  <div>
+                    <Link className="text-sm font-sans text-blue-300 hover:text-blue-800 cursor-pointer " to="/register">Quên mật khẩu ? </Link>
+                  </div>
+                </div>
+                <button className="w-full h-10 bg-[#1E6ABF] text-white flex gap-2 items-center justify-center rounded-lg cursor-pointer">
+                  <LogIn size={16} />
+                  <span>Đăng nhập</span>
+                </button>
+                <div className="flex items-center justify-center">
+                  <span className="text-sm">Roomio v1.0 · Hệ thống quản lý không gian </span>
+                </div>
+                <div className="flex gap-3 mt-4">
+                  {/* Facebook */}
+                  <button className="flex-1 flex items-center justify-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] text-white text-sm font-medium py-2.5 px-4 rounded-xl transition-colors duration-200">
+                    <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="white">
+                      <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.235 2.686.235v2.97h-1.514c-1.491 0-1.956.93-1.956 1.886v2.254h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" />
+                    </svg>
+                     tiếp tục với Facebook
+                  </button>
+
+                  {/* Google */}
+                  <button className="flex-1 flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-700 text-sm font-medium py-2.5 px-4 rounded-xl border border-gray-200 shadow-sm transition-colors duration-200">
+                    <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                    </svg>
+                    tiếp tục với Gmail
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+  )
+}
